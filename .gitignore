@@ -1,0 +1,25 @@
+# Secrets : ne jamais publier
+.env
+*.env.local
+backend/.env
+
+# Python
+__pycache__/
+*.pyc
+backend/venv/
+.venv/
+.pytest_cache/
+
+# Fichiers envoyés par les utilisateurs (pièces d'identité, diplômes…) et bases locales
+backend/uploads/
+backend/*.db
+
+# Node / build
+node_modules/
+frontend/dist/
+
+# Éditeurs / système
+.claude/
+.vscode/
+.idea/
+.DS_Store

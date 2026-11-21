@@ -1,0 +1,10 @@
+import enum
+
+
+class WalletTransactionType(str, enum.Enum):
+    TOPUP = "TOPUP"
+    TRANSFER_IN = "TRANSFER_IN"
+    TRANSFER_OUT = "TRANSFER_OUT"
+    MISSION_PAYOUT = "MISSION_PAYOUT"
+    MISSION_REFUND = "MISSION_REFUND"
+    MISSION_PAYMENT = "MISSION_PAYMENT"

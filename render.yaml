@@ -1,0 +1,74 @@
+# Déploiement Render (Blueprint) — voir DEPLOIEMENT.md
+# Render > New > Blueprint > choisir ce dépôt : les deux services ci-dessous sont créés d'un coup.
+# Les variables marquées « sync: false » sont demandées par Render lors de la création.
+
+services:
+  # ---------- API FastAPI ----------
+  - type: web
+    name: proservices-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    region: frankfurt
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    # --proxy-headers : l'IP réelle du visiteur (X-Forwarded-For) est utilisée par la protection
+    # anti force brute de la connexion ; sans elle, tous les visiteurs partageraient l'IP du proxy Render.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips="*"
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: MONGO_URI
+        sync: false # mongodb+srv://utilisateur:motdepasse@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+      - key: MONGO_DB_NAME
+        value: proservices
+      - key: SECRET_KEY
+        generateValue: true # clé aléatoire générée par Render
+      - key: DEBUG
+        value: "false"
+      - key: PAYMENT_SIMULATION
+        value: "true" # démo : paiements simulés (aucune passerelle réelle). Mettre "false" en vraie production.
+      - key: ALLOWED_ORIGINS
+        sync: false # adresse du site, ex. https://proservices-web.onrender.com
+      - key: FRONTEND_URL
+        sync: false # même adresse que ci-dessus
+      - key: PUBLIC_API_URL
+        sync: false # adresse de l'API, ex. https://proservices-api.onrender.com
+      - key: SMTP_USER
+        sync: false # facultatif : envoi des emails (laisser vide pour désactiver)
+      - key: SMTP_PASSWORD
+        sync: false
+
+  # ---------- Site React (statique) ----------
+  - type: web
+    name: proservices-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
+    pullRequestPreviewsEnabled: false
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: VITE_API_URL
+        sync: false # adresse de l'API, ex. https://proservices-api.onrender.com (lue au moment du build)
+    routes:
+      # Application monopage : toutes les URL (/recherche, /admin…) servent index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
