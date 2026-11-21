@@ -40,20 +40,22 @@ Gardez cette chaîne : c'est la variable **`MONGO_URI`**. Ne la publiez jamais (
 
 ## 2. Mettre le code sur GitHub
 
-Render déploie depuis un dépôt Git. Depuis le dossier du projet :
+Le dépôt Git local existe déjà (branche `main`, premier commit fait). Il reste à l'envoyer sur GitHub :
+
+1. Créez le dépôt **vide** `proservices` sur https://github.com/new (il peut être privé ;
+   ne cochez ni README, ni .gitignore, ni licence).
+2. Depuis le dossier du projet :
 
 ```bash
 cd "/home/hodi/Bureau/projet soutenance/fonkou"
-git init
-git add .
-git status          # vérifiez qu'il n'y a NI backend/.env, NI backend/venv, NI node_modules, NI backend/uploads
-git commit -m "ProServices : version prête pour Render"
-git branch -M main
 git remote add origin https://github.com/<votre-compte>/proservices.git
 git push -u origin main
 ```
 
-Créez d'abord le dépôt vide `proservices` sur https://github.com/new (il peut être privé).
+GitHub demande alors votre identifiant et, à la place du mot de passe, un **jeton d'accès**
+(GitHub → Settings → Developer settings → Personal access tokens → *Generate new token*, droit `repo`).
+
+Ensuite, après chaque modification : `git add . && git commit -m "description" && git push`.
 Le fichier `.gitignore` exclut déjà les secrets (`.env`), l'environnement Python, `node_modules`
 et les pièces justificatives déposées en local.
 
